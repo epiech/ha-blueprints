@@ -1,5 +1,41 @@
-## Philips Hue Tap Switch (Original 4-Button)
+# 🏠 Home Assistant Blueprints
 
-Controls actions for each of the 4 buttons on the original kinetic Philips Hue Tap switch (ZGPSWITCH) connected via the official Philips Hue integration.
+A collection of tested, modern Home Assistant automation blueprints designed for reliability, clean UI selectors, and compatibility with current Home Assistant Core releases.
+
+---
+
+## 📋 Available Blueprints
+
+| Blueprint | Supported Hardware | Integration | Import |
+| :--- | :--- | :--- | :--- |
+| **Philips Hue Tap (Original 4-Button)** | Model `ZGPSWITCH` / `8718696743133` | [Philips Hue](https://www.home-assistant.io/integrations/hue/) | [![Import to Home Assistant](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fepiech%2Fha-blueprints%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fphilips_hue_tap.yaml) |
+
+---
+
+## 🔘 Philips Hue Tap Switch (Original 4-Button)
+
+Controls actions for each of the 4 buttons on the **original kinetic Philips Hue Tap Switch** connected via the official Philips Hue bridge integration.
+
+> [!NOTE]
+> This blueprint is for the **original kinetic 4-button Hue Tap** (battery-free, EnOcean kinetic harvester). It is **not** for the newer battery-powered Hue Tap Dial with rotary ring.
 
 [![Open your Home Assistant instance and show the blueprint import dialog with a specific blueprint pre-filled.](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fepiech%2Fha-blueprints%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fphilips_hue_tap.yaml)
+
+### 🎯 Features
+- **Modern Device Registry Support**: Works with modern Home Assistant Core releases where the model identifier is `Hue tap switch` or `Hue tap switch (ZGPSWITCH)`.
+- **Dual Trigger Handling**: Uses both native device trigger IDs and event data subtype fallbacks for instantaneous response.
+- **Independent Actions**: Assign any sequence of service calls, scenes, toggles, or scripts to each button.
+- **Restart Mode**: Handles rapid successive presses smoothly without queuing errors.
+
+### 📐 Button Layout
+
+```text
+       ┌──────────────┐
+       │      ●       │  <-- Button 1 (Large main surface / 1 dot)    │
+       │  ●●     ●●●● │
+       │     ●●●      │
+       └──────────────┘
+            ▲   ▲    ▲
+            │   │    └── Button 4 (Bottom right / 4 dots)
+            │   └─────── Button 3 (Bottom center / 3 dots)
+            └─────────── Button 2 (Bottom left / 2 dots)
