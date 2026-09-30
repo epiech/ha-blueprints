@@ -27,8 +27,7 @@ Click the badge below to open your Home Assistant instance and import automatica
 Method 2: Manual Import via URL
  1. In Home Assistant, navigate to Settings > Automations & Scenes > Blueprints.
  2. Click Import Blueprint (bottom right).
- 3. Paste the following URL into the dialog:
-https://github.com/epiech/ha-blueprints/blob/main/blueprints/automation/hue/philips_hue_tap.yaml
+ 3. Paste the following URL into the dialog:  https://github.com/epiech/ha-blueprints/blob/main/blueprints/automation/hue/philips_hue_tap.yaml
  4. Click Preview Blueprint, then click Import Blueprint.
 ---
 
