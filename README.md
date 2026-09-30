@@ -49,7 +49,7 @@ Why doesn't my switch appear in the device selector?
   2. Confirm the device model in Home Assistant under Settings > Devices & Services > Philips Hue is listed as Hue tap switch or ZGPSWITCH.
 
 Does this switch support long press or double click?
-No. The original Philips Hue Tap switch is powered entirely by kinetic energy harvested from your physical press (no battery). Because the circuit only has power for a fraction of a second during the click, hardware long-press or hold states do not exist.
+  - No. The original Philips Hue Tap switch is powered entirely by kinetic energy harvested from your physical press (no battery). Because the circuit only has power for a fraction of a second during the click, hardware long-press or hold states do not exist.
 
 
 ### 📐 Button Layout
