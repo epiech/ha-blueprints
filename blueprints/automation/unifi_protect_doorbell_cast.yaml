@@ -1,0 +1,109 @@
+blueprint:
+  name: UniFi Protect Doorbell - Stream to Google Nest Hub / Cast Devices
+  description: >
+    When a UniFi Doorbell rings, automatically stream the live camera feed to one or more
+    Google Nest Hubs or Cast-enabled displays, then stop the stream after a customizable timeout.
+    If pressed again while streaming, the timer resets.
+  domain: automation
+  author: epiech
+  source_url: https://github.com/epiech/ha-blueprints/blob/main/blueprints/automation/unifi_protect_doorbell_cast.yaml
+  homeassistant:
+    min_version: 2024.4.0
+  input:
+    doorbell_entity:
+      name: Doorbell Ring Entity
+      description: >
+        The doorbell ring sensor from UniFi Protect. Can be the 'Last Doorbell Ring' timestamp sensor
+        (e.g. sensor.g4_doorbell_pro_last_doorbell_ring) or the doorbell binary sensor / event.
+      selector:
+        entity:
+          filter:
+            - integration: unifiprotect
+              domain: sensor
+              device_class: timestamp
+            - integration: unifiprotect
+              domain: binary_sensor
+              device_class: occupancy
+            - integration: unifiprotect
+              domain: binary_sensor
+    camera_entity:
+      name: Doorbell Camera Entity
+      description: The camera entity to stream (e.g. camera.g4_doorbell_pro_high_resolution_channel).
+      selector:
+        entity:
+          filter:
+            - domain: camera
+    cast_devices:
+      name: Nest Hub / Cast Displays
+      description: Select one or more Google Nest Hubs or Chromecast displays to stream to.
+      selector:
+        entity:
+          filter:
+            - domain: media_player
+              integration: cast
+          multiple: true
+    stream_duration:
+      name: Stream Duration (seconds)
+      description: How long to display the live stream before stopping.
+      default: 90
+      selector:
+        number:
+          min: 15
+          max: 300
+          step: 5
+          unit_of_measurement: s
+    custom_actions:
+      name: Additional Actions (Optional)
+      description: Extra actions to run when the doorbell rings (e.g., pause media, play a chime, send a notification).
+      default: []
+      selector:
+        action: {}
+
+mode: restart
+max_exceeded: silent
+
+trigger:
+  - platform: state
+    entity_id: !input doorbell_entity
+    not_to:
+      - unavailable
+      - unknown
+
+condition:
+  # Filter out stale restarts or non-ring state updates:
+  - condition: template
+    value_template: >-
+      {% if trigger.to_state.domain == 'binary_sensor' %}
+        {{ trigger.to_state.state == 'on' }}
+      {% else %}
+        {{ trigger.from_state is not none and
+           trigger.from_state.state not in ['unavailable', 'unknown'] and
+           trigger.to_state.state != trigger.from_state.state }}
+      {% endif %}
+
+action:
+  # 1. Execute any extra user actions first (e.g. chime, lights)
+  - sequence: !input custom_actions
+
+  # 2. Play live stream on all selected Cast devices
+  - repeat:
+      for_each: !input cast_devices
+      sequence:
+        - action: camera.play_stream
+          target:
+            entity_id: !input camera_entity
+          data:
+            media_player: "{{ repeat.item }}"
+            format: hls
+
+  # 3. Keep stream active for specified duration
+  - delay:
+      seconds: !input stream_duration
+
+  # 4. Stop the stream on all selected Cast devices
+  - repeat:
+      for_each: !input cast_devices
+      sequence:
+        - action: media_player.media_stop
+          target:
+            entity_id: "{{ repeat.item }}"
