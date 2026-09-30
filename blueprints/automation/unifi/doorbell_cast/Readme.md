@@ -5,7 +5,7 @@ Automatically streams the live camera feed from your UniFi Doorbell to Google Ne
 [![Open your Home Assistant instance and show the blueprint import dialog with a specific blueprint pre-filled.](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fepiech%2Fha-blueprints%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Funifi%2Fdoorbell_cast%2Funifi_protect_doorbell_cast.yaml)
 
 > [!NOTE]
-> This blueprint is for **UniFi Protect Doorbells** (G4 Doorbell, G4 Doorbell Pro Wi-Fi/PoE, G5 Doorbell Pro) paired via the official [UniFi Protect Integration](https://www.home-assistant.io/integrations/unifiprotect/). It is **not** for UniFi Access readers (such as the G2/G6 Entry readers).
+> This blueprint is for **UniFi G4 Doorbell Pro Wi-Fi/PoE** paired via the official [UniFi Protect Integration](https://www.home-assistant.io/integrations/unifiprotect/). It is **not** for UniFi G4 Doorbell (UVC-G4-Doorbell), Doorbell Lite (UVC-Doorbell-B/UVC-Doorbell-Lite-W) or UniFi Access readers (such as the G2/G3/G6 Entry readers).
 
 ---
 
