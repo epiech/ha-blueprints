@@ -39,3 +39,16 @@ Controls actions for each of the 4 buttons on the **original kinetic Philips Hue
             │   │    └── Button 4 (Bottom right / 4 dots)
             │   └─────── Button 3 (Bottom center / 3 dots)
             └─────────── Button 2 (Bottom left / 2 dots)
+
+🚀 How to Import
+Method 1: My Home Assistant (One-Click)
+Click the badge below to open your Home Assistant instance and import automatically:
+
+
+Method 2: Manual Import via URL
+In Home Assistant, navigate to Settings > Automations & Scenes > Blueprints.
+Click Import Blueprint (bottom right).
+Paste the following URL into the dialog:
+text
+https://github.com/epiech/ha-blueprints/blob/main/blueprints/automation/philips_hue_tap.yaml
+Click Preview Blueprint, then click Import Blueprint.
