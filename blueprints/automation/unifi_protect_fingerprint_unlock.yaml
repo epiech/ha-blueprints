@@ -1,0 +1,85 @@
+blueprint:
+  name: UniFi Protect Doorbell - Unlock Smart Lock via Fingerprint
+  description: >
+    Unlocks a smart lock when an authorized fingerprint is identified on a UniFi Protect
+    G4 or G5 Doorbell Pro. Includes a safety timestamp check to prevent accidental unlocks
+    if the doorbell reboots or reconnects.
+  domain: automation
+  author: epiech
+  source_url: https://github.com/epiech/ha-blueprints/blob/main/blueprints/automation/unifi_protect_fingerprint_unlock.yaml
+  homeassistant:
+    min_version: 2024.4.0
+  input:
+    fingerprint_entity:
+      name: Fingerprint Sensor Entity
+      description: The fingerprint event entity from your UniFi Doorbell Pro (e.g. event.g4_doorbell_pro_fingerprint).
+      selector:
+        entity:
+          filter:
+            - domain: event
+              integration: unifiprotect
+    lock_entity:
+      name: Smart Lock
+      description: The smart lock to unlock when an authorized fingerprint is scanned.
+      selector:
+        entity:
+          filter:
+            - domain: lock
+    notify_devices:
+      name: Mobile App Notification (Optional)
+      description: Mobile app devices to receive a push notification when the door is unlocked.
+      default: []
+      selector:
+        device:
+          filter:
+            - integration: mobile_app
+          multiple: true
+    custom_actions:
+      name: Additional Actions (Optional)
+      description: Extra actions to run upon successful unlock (e.g., turn on a hallway light, play a chime, disarm an alarm).
+      default: []
+      selector:
+        action: {}
+
+mode: single
+
+trigger:
+  - platform: state
+    entity_id: !input fingerprint_entity
+    attribute: event_type
+    to: "identified"
+
+condition:
+  # Safety Check: Prevent accidental unlocks on doorbell restart/reconnect.
+  # Ensures the event actually occurred within the last 10 seconds.
+  - condition: template
+    value_template: >-
+      {{ trigger.to_state is defined and
+         trigger.to_state.last_changed is defined and
+         (as_timestamp(now()) - as_timestamp(trigger.to_state.last_changed)) < 10 }}
+
+action:
+  # 1. Unlock the door
+  - action: lock.unlock
+    target:
+      entity_id: !input lock_entity
+
+  # 2. Send push notifications if mobile devices were selected
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ notify_devices | length > 0 }}"
+        sequence:
+          - repeat:
+              for_each: !input notify_devices
+              sequence:
+                - action: notify.send_message
+                  target:
+                    device_id: "{{ repeat.item }}"
+                  data:
+                    title: "🔓 Door Unlocked"
+                    message: >-
+                      Door unlocked by {{ trigger.to_state.attributes.full_name | default(trigger.to_state.attributes.user_id | default('Authorized Fingerprint', true), true) }}.
+
+  # 3. Execute any user-defined additional actions
+  - sequence: !input custom_actions
