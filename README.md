@@ -28,6 +28,7 @@ Controls actions for each of the 4 buttons on the **original kinetic Philips Hue
 - **Restart Mode**: Handles rapid successive presses smoothly without queuing errors.
 
 🚀 How to Import
+
 Method 1: My Home Assistant (One-Click)
 Click the badge below to open your Home Assistant instance and import automatically:
 
