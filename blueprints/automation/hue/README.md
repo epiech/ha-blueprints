@@ -17,6 +17,25 @@ Controls actions for each of the 4 buttons on the **original kinetic Philips Hue
 
 ---
 
+🚀 How to Import
+One-Click Import
+
+Manual Import URL
+text
+https://github.com/epiech/ha-blueprints/blob/main/blueprints/automation/hue/philips_hue_tap.yaml
+
+---
+
+❓ Troubleshooting & FAQ:
+
+Why doesn't my switch appear in the device selector?
+ 1. Make sure your switch is paired through the official Philips Hue integration (via a Philips Hue Bridge). If paired via Zigbee2MQTT or ZHA, this blueprint does not apply.
+ 2. Confirm the device model in Home Assistant under Settings > Devices & Services > Philips Hue is listed as Hue tap switch or ZGPSWITCH.
+
+Does this switch support long press or double click?
+ - No. The original Philips Hue Tap switch is powered entirely by kinetic energy harvested from your physical click (no battery). Because the circuit only has power for a fraction of a second during the press, hardware long-press or hold states do not exist.
+---
+
 ### 📐 Button Layout
 
 ```text
