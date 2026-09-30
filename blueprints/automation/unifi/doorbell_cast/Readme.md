@@ -32,7 +32,9 @@ Click the badge below to open your Home Assistant instance with the blueprint pr
 3. Paste the following URL into the dialog:
    ```text
    https://github.com/epiech/ha-blueprints/blob/main/blueprints/automation/unifi/doorbell_cast/unifi_protect_doorbell_cast.yaml
-
+   ```
+4. Click Preview Blueprint, then click Import Blueprint.
+   
 ---
 
 ❓ Troubleshooting & FAQ:
