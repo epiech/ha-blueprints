@@ -1,0 +1,112 @@
+blueprint:
+  name: Philips Hue Tap Switch (Original 4-Button) Actions
+  description: >
+    Control actions for each of the 4 buttons on the original kinetic Philips Hue Tap Switch
+    (model 8718696743133 / 9290011152X / ZGPSWITCH) connected via the official Philips Hue integration.
+
+    Note: This is for the original kinetic 4-button Hue Tap, NOT the newer Hue Tap Dial.
+  domain: automation
+  author: Community
+  homeassistant:
+    min_version: 2023.8.0
+  input:
+    hue_tap:
+      name: Philips Hue Tap Switch
+      description: Select your original Philips Hue Tap switch (paired via the Philips Hue integration).
+      selector:
+        device:
+          filter:
+            - integration: hue
+              model: Hue tap switch
+            - integration: hue
+              model: Hue tap switch (ZGPSWITCH)
+    button_1_action:
+      name: Button 1 (Large / 1 Dot)
+      description: Action to execute when the large button (Button 1) is pressed.
+      default: []
+      selector:
+        action: {}
+    button_2_action:
+      name: Button 2 (2 Dots - Bottom Left)
+      description: Action to execute when the two-dot button (Button 2) is pressed.
+      default: []
+      selector:
+        action: {}
+    button_3_action:
+      name: Button 3 (3 Dots - Bottom Center)
+      description: Action to execute when the three-dot button (Button 3) is pressed.
+      default: []
+      selector:
+        action: {}
+    button_4_action:
+      name: Button 4 (4 Dots - Bottom Right)
+      description: Action to execute when the four-dot button (Button 4) is pressed.
+      default: []
+      selector:
+        action: {}
+
+mode: restart
+max_exceeded: silent
+
+trigger:
+  - platform: device
+    device_id: !input hue_tap
+    domain: hue
+    type: initial_press
+    subtype: 1
+    id: button_1
+  - platform: device
+    device_id: !input hue_tap
+    domain: hue
+    type: initial_press
+    subtype: 2
+    id: button_2
+  - platform: device
+    device_id: !input hue_tap
+    domain: hue
+    type: initial_press
+    subtype: 3
+    id: button_3
+  - platform: device
+    device_id: !input hue_tap
+    domain: hue
+    type: initial_press
+    subtype: 4
+    id: button_4
+
+condition: []
+
+action:
+  - choose:
+      - conditions:
+          - or:
+              - condition: trigger
+                id: button_1
+              - condition: template
+                value_template: >-
+                  {{ trigger.event is defined and trigger.event.data is defined and (trigger.event.data.subtype | string == '1') }}
+        sequence: !input button_1_action
+      - conditions:
+          - or:
+              - condition: trigger
+                id: button_2
+              - condition: template
+                value_template: >-
+                  {{ trigger.event is defined and trigger.event.data is defined and (trigger.event.data.subtype | string == '2') }}
+        sequence: !input button_2_action
+      - conditions:
+          - or:
+              - condition: trigger
+                id: button_3
+              - condition: template
+                value_template: >-
+                  {{ trigger.event is defined and trigger.event.data is defined and (trigger.event.data.subtype | string == '3') }}
+        sequence: !input button_3_action
+      - conditions:
+          - or:
+              - condition: trigger
+                id: button_4
+              - condition: template
+                value_template: >-
+                  {{ trigger.event is defined and trigger.event.data is defined and (trigger.event.data.subtype | string == '4') }}
+        sequence: !input button_4_action
