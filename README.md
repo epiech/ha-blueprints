@@ -19,7 +19,7 @@ Controls actions for each of the 4 buttons on the **original kinetic Philips Hue
 > [!NOTE]
 > This blueprint is for the **original kinetic 4-button Hue Tap** (battery-free, EnOcean kinetic harvester). It is **not** for the newer battery-powered Hue Tap Dial with rotary ring.
 
-[![Open your Home Assistant instance and show the blueprint import dialog with a specific blueprint pre-filled.](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fepiech%2Fha-blueprints%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fphilips_hue_tap.yaml)
+
 
 ### 🎯 Features
 - **Modern Device Registry Support**: Works with modern Home Assistant Core releases where the model identifier is `Hue tap switch` or `Hue tap switch (ZGPSWITCH)`.
@@ -31,6 +31,7 @@ Controls actions for each of the 4 buttons on the **original kinetic Philips Hue
 Method 1: My Home Assistant (One-Click)
 Click the badge below to open your Home Assistant instance and import automatically:
 
+[![Open your Home Assistant instance and show the blueprint import dialog with a specific blueprint pre-filled.](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fepiech%2Fha-blueprints%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fphilips_hue_tap.yaml)
 
 Method 2: Manual Import via URL
 In Home Assistant, navigate to Settings > Automations & Scenes > Blueprints.
