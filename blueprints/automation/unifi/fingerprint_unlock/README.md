@@ -33,6 +33,8 @@ Click the badge below to open your Home Assistant instance with the blueprint pr
    ```
 4. Click Preview Blueprint, then click Import Blueprint.
 
+---
+
 ❓ Troubleshooting & FAQ
 1. Which entity should I select for the Fingerprint Sensor?
    - Look for the event entity associated with your doorbell's fingerprint reader, typically named event.<your_doorbell>_fingerprint (e.g., event.g4_doorbell_pro_poe_fingerprint).
