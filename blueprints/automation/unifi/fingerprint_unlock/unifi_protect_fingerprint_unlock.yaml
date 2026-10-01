@@ -2,11 +2,10 @@ blueprint:
   name: UniFi Protect Doorbell - Unlock Smart Lock via Fingerprint
   description: >
     Unlocks a smart lock when an authorized fingerprint is identified on a UniFi Protect
-    G4 or G5 Doorbell Pro. Includes a safety timestamp check to prevent accidental unlocks
-    if the doorbell reboots or reconnects.
+    G4 or G5 Doorbell Pro. Hardened against reconnection replays, entity unavailability,
+    and unrecognized fingerprints.
   domain: automation
   author: epiech
-  source_url: https://github.com/epiech/ha-blueprints/blob/main/blueprints/automation/unifi_protect_fingerprint_unlock.yaml
   homeassistant:
     min_version: 2024.4.0
   input:
@@ -50,13 +49,29 @@ trigger:
     to: "identified"
 
 condition:
-  # Safety Check: Prevent accidental unlocks on doorbell restart/reconnect.
-  # Ensures the event actually occurred within the last 10 seconds.
+  # 1. Guard against restarts & reconnects (ignore transitions from unavailable/unknown)
   - condition: template
     value_template: >-
-      {{ trigger.to_state is defined and
-         trigger.to_state.last_changed is defined and
-         (as_timestamp(now()) - as_timestamp(trigger.to_state.last_changed)) < 10 }}
+      {{ trigger.from_state is defined and
+         trigger.from_state.state not in ['unavailable', 'unknown'] and
+         trigger.to_state is defined and
+         trigger.to_state.state not in ['unavailable', 'unknown'] }}
+
+  # 2. Ensure state timestamp actually changed (not a restored/replayed attribute)
+  - condition: template
+    value_template: >-
+      {{ trigger.from_state.state != trigger.to_state.state }}
+
+  # 3. Check event freshness against the actual scan time (state ISO timestamp), not last_changed
+  - condition: template
+    value_template: >-
+      {{ (as_timestamp(now()) - as_timestamp(trigger.to_state.state, default=0)) < 10 }}
+
+  # 4. Filter out unknown fingerprints (must have a valid user ID / name attribute)
+  - condition: template
+    value_template: >-
+      {{ trigger.to_state.attributes.user_id is defined and
+         trigger.to_state.attributes.user_id not in ['', none, 'unknown'] }}
 
 action:
   # 1. Unlock the door
@@ -79,7 +94,7 @@ action:
                   data:
                     title: "🔓 Door Unlocked"
                     message: >-
-                      Door unlocked by {{ trigger.to_state.attributes.full_name | default(trigger.to_state.attributes.user_id | default('Authorized Fingerprint', true), true) }}.
+                      Door unlocked by {{ trigger.to_state.attributes.full_name | default(trigger.to_state.attributes.user_id, true) }}.
 
   # 3. Execute any user-defined additional actions
   - sequence: !input custom_actions
