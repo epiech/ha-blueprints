@@ -10,7 +10,8 @@ Unlocks a smart lock when an authorized fingerprint is scanned on a UniFi Protec
 ---
 
 ### 🎯 Features
-- **Anti-Reboot Safety Check**: Verifies that the fingerprint scan occurred within the last 10 seconds. This prevents your door from unlocking accidentally if the doorbell reboots, updates, or reconnects to the network and re-broadcasts its last event state.
+- **Anti-Reboot & Reconnect Safety Checks**: Protects against accidental door unlocks if the doorbell reboots, updates firmware, or drops Wi-Fi. It explicitly ignores transitions from `unavailable`/`unknown` states and verifies that a fresh event occurred within the last 10 seconds.
+- **Unknown Fingerprint Filtering**: Guarded against unrecognized prints by strictly requiring an identified, valid user ID before triggering an unlock.
 - **Universal Lock Compatibility**: Works with any smart lock in Home Assistant (`lock.*`), including Schlage, Yale, August, SwitchBot, Zigbee, and Z-Wave locks.
 - **User-Identified Notifications**: Optionally sends a push notification to selected mobile devices showing who unlocked the door (e.g. *"Door unlocked by John"*).
 - **Custom Actions Hook**: Optionally trigger extra actions upon unlocking (e.g., turn on entryway lights, disarm an alarm system, or play a chime).
@@ -30,20 +31,25 @@ Click the badge below to open your Home Assistant instance with the blueprint pr
 3. Paste the following URL into the dialog:
    ```text
    https://github.com/epiech/ha-blueprints/blob/main/blueprints/automation/unifi/fingerprint_unlock/unifi_protect_fingerprint_unlock.yaml
+
    ```
 4. Click Preview Blueprint, then click Import Blueprint.
 
 ---
 
 ❓ Troubleshooting & FAQ
+
 1. Which entity should I select for the Fingerprint Sensor?
-   - Look for the event entity associated with your doorbell's fingerprint reader, typically named event.<your_doorbell>_fingerprint (e.g., event.g4_doorbell_pro_poe_fingerprint).
+  - Look for the event entity associated with your doorbell's fingerprint reader, typically named event.<your_doorbell>_fingerprint (e.g., event.g4_doorbell_pro_poe_fingerprint).
 
 2. Why does my notification say "Door unlocked by Authorized Fingerprint" instead of a person's name?
-   - Make sure you have named the user/fingerprint inside the UniFi Protect app or console. If no name is assigned to that fingerprint in Protect, it falls back to the user ID or "Authorized Fingerprint".
-     
+  - Make sure you have assigned a user name to that fingerprint inside the UniFi Protect app or console. If no name is found in the Protect attributes, it falls back to the user ID or a generic fallback.
+
 3. Can an unauthorized or unrecognized fingerprint trigger an unlock?
-   - No. The automation strictly triggers only when the fingerprint event status is identified. Unrecognized or rejected prints emit different event states (unidentified or failed) and are completely ignored.
-     
-4. Will my door unlock if the doorbell reboots or loses power?
-   - No. The built-in safety check ensures that the event occurred within 10 seconds of execution. When UniFi Protect restarts or reconnects, any stale cached events are blocked by this condition.
+  - No. The official Protect integration triggers an event on both recognized and unrecognized fingerprints, but unrecognized prints omit the fingerprint/user ID. This blueprint strictly verifies that event_type is identified and that a valid user ID attribute is present, safely rejecting unknown prints.
+
+4. Will my door unlock if the doorbell reboots, updates, or reconnects to Wi-Fi?
+  - No. As noted in the Home Assistant UniFi Protect documentation, reconnecting devices can cause state restoration events. This blueprint guards against this by:
+    - Ignoring any state transitions originating from unavailable or unknown.
+    - Confirming the event timestamp actually changed (avoiding cached state replays).
+    - Validating that the physical hardware event timestamp is less than 10 seconds old.
