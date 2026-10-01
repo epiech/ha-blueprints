@@ -2,7 +2,7 @@ blueprint:
   name: UniFi Protect Doorbell - Unlock Smart Lock via Fingerprint
   description: >
     Unlocks a smart lock when an authorized fingerprint is identified on a UniFi Protect
-    G4 or G5 Doorbell Pro. Hardened against reconnection replays, entity unavailability,
+    G4 Doorbell Pro. Hardened against reconnection replays, entity unavailability,
     and unrecognized fingerprints.
   domain: automation
   author: epiech
