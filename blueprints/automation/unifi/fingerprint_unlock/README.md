@@ -40,16 +40,16 @@ Click the badge below to open your Home Assistant instance with the blueprint pr
 ❓ Troubleshooting & FAQ
 
 1. Which entity should I select for the Fingerprint Sensor?
-  - Look for the event entity associated with your doorbell's fingerprint reader, typically named event.<your_doorbell>_fingerprint (e.g., event.g4_doorbell_pro_poe_fingerprint).
+   - Look for the event entity associated with your doorbell's fingerprint reader, typically named event.<your_doorbell>_fingerprint (e.g., event.g4_doorbell_pro_poe_fingerprint).
 
 2. Why does my notification say "Door unlocked by Authorized Fingerprint" instead of a person's name?
-  - Make sure you have assigned a user name to that fingerprint inside the UniFi Protect app or console. If no name is found in the Protect attributes, it falls back to the user ID or a generic fallback.
+   - Make sure you have assigned a user name to that fingerprint inside the UniFi Protect app or console. If no name is found in the Protect attributes, it falls back to the user ID or a generic fallback.
 
 3. Can an unauthorized or unrecognized fingerprint trigger an unlock?
-  - No. The official Protect integration triggers an event on both recognized and unrecognized fingerprints, but unrecognized prints omit the fingerprint/user ID. This blueprint strictly verifies that event_type is identified and that a valid user ID attribute is present, safely rejecting unknown prints.
+   - No. The official Protect integration triggers an event on both recognized and unrecognized fingerprints, but unrecognized prints omit the fingerprint/user ID. This blueprint strictly verifies that event_type is identified and that a valid user ID attribute is present, safely rejecting unknown prints.
 
 4. Will my door unlock if the doorbell reboots, updates, or reconnects to Wi-Fi?
-  - No. As noted in the Home Assistant UniFi Protect documentation, reconnecting devices can cause state restoration events. This blueprint guards against this by:
-    - Ignoring any state transitions originating from unavailable or unknown.
-    - Confirming the event timestamp actually changed (avoiding cached state replays).
-    - Validating that the physical hardware event timestamp is less than 10 seconds old.
+   - No. As noted in the Home Assistant UniFi Protect documentation, reconnecting devices can cause state restoration events. This blueprint guards against this by:
+     - Ignoring any state transitions originating from unavailable or unknown.
+     - Confirming the event timestamp actually changed (avoiding cached state replays).
+     - Validating that the physical hardware event timestamp is less than 10 seconds old.
