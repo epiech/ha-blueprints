@@ -40,9 +40,9 @@ blueprint:
     allowed_nfc_ids:
       name: Authorized NFC Card IDs
       description: >-
-        List of authorized NFC Card UIDs permitted to unlock the lock (e.g. ABCDEF1234 or 04:12:ab:cd).
-        Matching is case-insensitive and ignores colons/spaces. If empty, NFC unlocking is disallowed.
-        WARNING: Standard NFC card UIDs can be cloned. Only allow cards/fobs you physically control and verify.
+        List of authorized NFC Card UIDs. You can optionally include a friendly name
+        (e.g., "62B13DE4: Eric", "62B13DE4 (Eric)", or just "62B13DE4").
+        Matching is case-insensitive. WARNING: Standard NFC card UIDs can be cloned.
       default: []
       selector:
         text:
@@ -119,13 +119,17 @@ condition:
            fp_user not in ['', none, 'unknown'] }}
       {% elif trigger.id == 'nfc' %}
         {% set raw_id = trigger.to_state.attributes.get('nfc_id', '') | string | lower | replace(':', '') | replace(' ', '') %}
-        {% set clean_allowed = (allowed_nfc_ids if allowed_nfc_ids is iterable and allowed_nfc_ids is not string else [allowed_nfc_ids])
-           | map('string') | map('lower') | map('replace', ':', '') | map('replace', ' ', '') | list %}
+        {% set ns = namespace(found=false) %}
+        {% for entry in (allowed_nfc_ids if allowed_nfc_ids is iterable and allowed_nfc_ids is not string else [allowed_nfc_ids]) %}
+          {% set clean_entry = entry | string | lower | replace(':', '') | replace(' ', '') %}
+          {% if raw_id != '' and (raw_id in clean_entry or clean_entry in raw_id) %}
+            {% set ns.found = true %}
+          {% endif %}
+        {% endfor %}
         {{ nfc_enabled and
            trigger.to_state.attributes.event_type == 'scanned' and
            raw_id != '' and
-           clean_allowed | length > 0 and
-           raw_id in clean_allowed }}
+           ns.found }}
       {% else %}
         false
       {% endif %}
@@ -154,9 +158,23 @@ action:
                       {% if trigger.id == 'fingerprint' %}
                         Door unlocked via fingerprint ({{ trigger.to_state.attributes.full_name | default(trigger.to_state.attributes.get('ulp_id'), true) | default(trigger.to_state.attributes.get('user_id'), true) }}).
                       {% elif trigger.id == 'nfc' %}
-                        {% set person = trigger.to_state.attributes.full_name | default(trigger.to_state.attributes.get('ulp_id'), false) | default(trigger.to_state.attributes.get('user_id'), false) %}
+                        {% set raw_id = trigger.to_state.attributes.get('nfc_id', '') | string | lower | replace(':', '') | replace(' ', '') %}
+                        {% set ns = namespace(name='') %}
+                        {% for entry in (allowed_nfc_ids if allowed_nfc_ids is iterable and allowed_nfc_ids is not string else [allowed_nfc_ids]) %}
+                          {% set clean_entry = entry | string | lower | replace(':', '') | replace(' ', '') %}
+                          {% if raw_id != '' and raw_id in clean_entry %}
+                            {% if ':' in (entry | string) %}
+                              {% set ns.name = (entry | string).split(':')[-1] | trim %}
+                            {% elif '-' in (entry | string) %}
+                              {% set ns.name = (entry | string).split('-')[-1] | trim %}
+                            {% elif '(' in (entry | string) and ')' in (entry | string) %}
+                              {% set ns.name = (entry | string).split('(')[1].split(')')[0] | trim %}
+                            {% endif %}
+                          {% endif %}
+                        {% endfor %}
+                        {% set person = ns.name | default(trigger.to_state.attributes.get('full_name'), true) | default(trigger.to_state.attributes.get('ulp_id'), false) %}
                         {% if person %}
-                          Door unlocked via NFC card ({{ person }} - {{ trigger.to_state.attributes.nfc_id }}).
+                          Door unlocked via NFC card ({{ person }}).
                         {% else %}
                           Door unlocked via NFC card (ID: {{ trigger.to_state.attributes.nfc_id }}).
                         {% endif %}
