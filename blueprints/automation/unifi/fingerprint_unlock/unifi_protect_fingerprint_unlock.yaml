@@ -101,24 +101,27 @@ condition:
     value_template: >-
       {{ trigger.from_state.state != trigger.to_state.state }}
 
-  # 3. Check event freshness against the actual scan time (state ISO timestamp), not last_changed
+  # 3. Check event freshness against the actual scan time with clock skew tolerance
   - condition: template
     value_template: >-
-      {{ (as_timestamp(now()) - as_timestamp(trigger.to_state.state, default=0)) < 10 }}
+      {{ (as_timestamp(now()) - as_timestamp(trigger.to_state.state, default=0)) | abs < 15 }}
 
   # 4. Authorize based on trigger type (Fingerprint vs NFC)
   - condition: template
     value_template: >-
+      {% set fp_enabled = true if enable_fingerprint is not defined or enable_fingerprint in [none, ''] else enable_fingerprint %}
+      {% set nfc_enabled = true if enable_nfc is not defined or enable_nfc in [none, ''] else enable_nfc %}
       {% if trigger.id == 'fingerprint' %}
-        {{ enable_fingerprint and
+        {% set fp_user = trigger.to_state.attributes.get('ulp_id') or trigger.to_state.attributes.get('user_id') or trigger.to_state.attributes.get('full_name') %}
+        {{ fp_enabled and
            trigger.to_state.attributes.event_type == 'identified' and
-           trigger.to_state.attributes.user_id is defined and
-           trigger.to_state.attributes.user_id not in ['', none, 'unknown'] }}
+           fp_user is defined and
+           fp_user not in ['', none, 'unknown'] }}
       {% elif trigger.id == 'nfc' %}
         {% set raw_id = trigger.to_state.attributes.get('nfc_id', '') | string | lower | replace(':', '') | replace(' ', '') %}
         {% set clean_allowed = (allowed_nfc_ids if allowed_nfc_ids is iterable and allowed_nfc_ids is not string else [allowed_nfc_ids])
            | map('string') | map('lower') | map('replace', ':', '') | map('replace', ' ', '') | list %}
-        {{ enable_nfc and
+        {{ nfc_enabled and
            trigger.to_state.attributes.event_type == 'scanned' and
            raw_id != '' and
            clean_allowed | length > 0 and
@@ -149,9 +152,9 @@ action:
                     title: "🔓 Door Unlocked"
                     message: >-
                       {% if trigger.id == 'fingerprint' %}
-                        Door unlocked via fingerprint ({{ trigger.to_state.attributes.full_name | default(trigger.to_state.attributes.user_id, true) }}).
+                        Door unlocked via fingerprint ({{ trigger.to_state.attributes.full_name | default(trigger.to_state.attributes.get('ulp_id'), true) | default(trigger.to_state.attributes.get('user_id'), true) }}).
                       {% elif trigger.id == 'nfc' %}
-                        {% set person = trigger.to_state.attributes.full_name | default(trigger.to_state.attributes.user_id, false) %}
+                        {% set person = trigger.to_state.attributes.full_name | default(trigger.to_state.attributes.get('ulp_id'), false) | default(trigger.to_state.attributes.get('user_id'), false) %}
                         {% if person %}
                           Door unlocked via NFC card ({{ person }} - {{ trigger.to_state.attributes.nfc_id }}).
                         {% else %}
