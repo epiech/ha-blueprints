@@ -333,7 +333,7 @@ blueprint:
       input:
         bypass_boolean:
           name: Bath Mode / Stay-On Bypass Helper (Optional)
-          description: An input_boolean or switch (e.g. input_boolean.input_boolean_jakes_bath_mode). When ON, lights will NOT automatically turn off.
+          description: An input_boolean or switch (e.g. input_boolean.input_boolean_bath_mode). When ON, lights will NOT automatically turn off.
           default: []
           selector:
             entity:
