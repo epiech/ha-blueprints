@@ -1,17 +1,46 @@
 <div align="center">
-# 💡 Smart Room & Bathroom Lighting Automation
-### Home Assistant Blueprint for Intelligent Multi-Sensor Occupancy, Privacy Mode & Granular Color Control
-A comprehensive, production-ready Home Assistant automation blueprint designed for intelligent room and bathroom occupancy lighting. It supports **multiple motion/presence sensors**, **multiple door contact sensors**, **privacy/shower auto-off prevention**, and **granular lighting control** (brightness, Kelvin color temperature, and RGB color) across daytime and night mode schedules.
-[![Open your Home Assistant instance and show the blueprint import dialog with a specific blueprint pre-filled.](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fepiech%2Fha-blueprints%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fsmart_bathroom_occupancy_lighting.yaml)
-[![Home Assistant Version](https://img.shields.io/badge/Home%20Assistant-2024.6.0%2B-blue.svg?style=flat-square&logo=home-assistant)](https://www.home-assistant.io)
-[![Blueprint Type](https://img.shields.io/badge/Type-Automation%20Blueprint-orange.svg?style=flat-square&logo=yaml)](https://www.home-assistant.io/docs/blueprint/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-<p align="center">
-  <b>Multi-Motion Sync</b> • <b>Multi-Door Occupancy</b> • <b>Shower/Privacy Protection</b> • <b>Kelvin / RGB / Brightness</b> • <b>Day & Night Schedules</b>
-</p>
----
-## 🌟 Key Features
+
+  <h1>💡 Smart Room & Bathroom Lighting Automation</h1>
+  <h3>Home Assistant Blueprint for Intelligent Multi-Sensor Occupancy, Privacy Mode & Granular Color Control</h3>
+
+  <p>
+    A comprehensive, production-ready Home Assistant automation blueprint designed for intelligent room and bathroom occupancy lighting. It supports <b>multiple motion/presence sensors</b>, <b>multiple door contact sensors</b>, <b>privacy/shower auto-off prevention</b>, and <b>granular lighting control</b> (brightness, Kelvin color temperature, and RGB color) across daytime and night mode schedules.
+  </p>
+
+  <p>
+    <a href="https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fepiech%2Fha-blueprints%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fsmart_bathroom_occupancy_lighting.yaml">
+      <img src="https://my.home-assistant.io/badges/blueprint_import.svg" alt="Open your Home Assistant instance and show the blueprint import dialog with a specific blueprint pre-filled." />
+    </a>
+  </p>
+
+  <p>
+    <a href="https://www.home-assistant.io"><img src="https://img.shields.io/badge/Home%20Assistant-2024.6.0%2B-blue.svg?style=flat-square&logo=home-assistant" alt="Home Assistant Version" /></a>
+    <a href="https://www.home-assistant.io/docs/blueprint/"><img src="https://img.shields.io/badge/Type-Automation%20Blueprint-orange.svg?style=flat-square&logo=yaml" alt="Blueprint Type" /></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square" alt="License: MIT" /></a>
+  </p>
+
+  <p>
+    <b>Multi-Motion Sync</b> • <b>Multi-Door Occupancy</b> • <b>Shower/Privacy Protection</b> • <b>Kelvin / RGB / Brightness</b> • <b>Day & Night Schedules</b>
+  </p>
+
 </div>
+
+---
+
+## 📖 Overview
+
+Standard motion light automations often suffer from common frustrations:
+- Lights turning off while you are in the shower or using the bathroom because you are sitting still.
+- Lack of support for multiple motion sensors covering different angles or zones.
+- Rigid color settings that don't differentiate between day and night.
+- Premature shutoff when one motion sensor resets before another.
+
+This blueprint solves all of these challenges in a single, robust automation. It connects **multiple motion/presence sensors** and **multiple door contact sensors** with built-in **bathroom privacy protection**, **sun/illuminance gating**, and **granular color control** (brightness %, color temperature in Kelvin, or RGB color).
+
+---
+
+## 🌟 Key Features
+
 * **Multi-Motion Sensor Synchronization**: Add 1, 2, or more motion/presence sensors. Vacancy timers synchronize across all sensors so lights will not turn off prematurely if one sensor clears while another still detected recent motion.
 * **Multi-Door Detection & Bathroom Privacy Protection**:
   * Opening any door triggers occupancy immediately (often before motion sensors catch you entering).
@@ -30,8 +59,3 @@ A comprehensive, production-ready Home Assistant automation blueprint designed f
 * **Bypass & Kill Switches**:
   * **Bath Mode / Keep-On Bypass**: Helper entity to lock lights on.
   * **Automation Kill Switch**: Master toggle to suppress the automation entirely.
-## 📖 Overview
-Standard motion light automations often suffer from common frustrations:
-- Lights turning off while you are in the shower or using the bathroom because you are sitting still.
-- Lack of support for multiple motion sensors covering different angles or zones.
-- Rigid color settings that don't differentiate between day and night.
