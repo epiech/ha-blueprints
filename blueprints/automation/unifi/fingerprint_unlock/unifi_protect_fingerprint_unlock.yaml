@@ -1,9 +1,9 @@
 blueprint:
-  name: UniFi Protect Doorbell - Unlock Smart Lock via Fingerprint
+  name: UniFi Protect Doorbell - Unlock Smart Lock via Fingerprint or NFC
   description: >
-    Unlocks a smart lock when an authorized fingerprint is identified on a UniFi Protect
-    G4 Doorbell Pro. Hardened against reconnection replays, entity unavailability,
-    and unrecognized fingerprints.
+    Unlocks a smart lock when an authorized fingerprint or NFC card is scanned on a
+    UniFi Protect G4 Doorbell Pro. Hardened against reconnection replays, entity
+    unavailability, and unauthorized scans.
   domain: automation
   author: epiech
   homeassistant:
@@ -17,9 +17,38 @@ blueprint:
           filter:
             - domain: event
               integration: unifiprotect
+    enable_fingerprint:
+      name: Enable Fingerprint Unlock
+      description: Allow authorized fingerprints to unlock the smart lock.
+      default: true
+      selector:
+        boolean: {}
+    nfc_entity:
+      name: NFC Sensor Entity
+      description: The NFC event entity from your UniFi Doorbell Pro (e.g. event.g4_doorbell_pro_nfc).
+      selector:
+        entity:
+          filter:
+            - domain: event
+              integration: unifiprotect
+    enable_nfc:
+      name: Enable NFC Unlock
+      description: Allow authorized NFC cards to unlock the smart lock.
+      default: true
+      selector:
+        boolean: {}
+    allowed_nfc_ids:
+      name: Authorized NFC Card IDs
+      description: >-
+        List of authorized NFC Card UIDs permitted to unlock the lock (e.g. ABCDEF1234 or 04:12:ab:cd).
+        Matching is case-insensitive and ignores colons/spaces. If empty, NFC unlocking is disallowed.
+      default: []
+      selector:
+        text:
+          multiple: true
     lock_entity:
       name: Smart Lock
-      description: The smart lock to unlock when an authorized fingerprint is scanned.
+      description: The smart lock to unlock when authorized biometric or NFC credentials are scanned.
       selector:
         entity:
           filter:
@@ -40,24 +69,33 @@ blueprint:
       selector:
         action: {}
 
+variables:
+  enable_fingerprint: !input enable_fingerprint
+  enable_nfc: !input enable_nfc
+  allowed_nfc_ids: !input allowed_nfc_ids
+  notify_devices: !input notify_devices
+
 mode: single
 
 trigger:
   - platform: state
     entity_id: !input fingerprint_entity
-    attribute: event_type
-    to: "identified"
+    id: fingerprint
+  - platform: state
+    entity_id: !input nfc_entity
+    id: nfc
 
 condition:
-  # 1. Guard against restarts & reconnects (ignore transitions from unavailable/unknown)
+  # 1. Guard against restarts & reconnects (ignore transitions from/to unavailable or unknown, or restored state)
   - condition: template
     value_template: >-
       {{ trigger.from_state is defined and
          trigger.from_state.state not in ['unavailable', 'unknown'] and
+         not trigger.from_state.attributes.get('restored', false) and
          trigger.to_state is defined and
          trigger.to_state.state not in ['unavailable', 'unknown'] }}
 
-  # 2. Ensure state timestamp actually changed (not a restored/replayed attribute)
+  # 2. Ensure state timestamp actually changed (not a replayed or attribute-only event)
   - condition: template
     value_template: >-
       {{ trigger.from_state.state != trigger.to_state.state }}
@@ -67,11 +105,26 @@ condition:
     value_template: >-
       {{ (as_timestamp(now()) - as_timestamp(trigger.to_state.state, default=0)) < 10 }}
 
-  # 4. Filter out unknown fingerprints (must have a valid user ID / name attribute)
+  # 4. Authorize based on trigger type (Fingerprint vs NFC)
   - condition: template
     value_template: >-
-      {{ trigger.to_state.attributes.user_id is defined and
-         trigger.to_state.attributes.user_id not in ['', none, 'unknown'] }}
+      {% if trigger.id == 'fingerprint' %}
+        {{ enable_fingerprint and
+           trigger.to_state.attributes.event_type == 'identified' and
+           trigger.to_state.attributes.user_id is defined and
+           trigger.to_state.attributes.user_id not in ['', none, 'unknown'] }}
+      {% elif trigger.id == 'nfc' %}
+        {% set raw_id = trigger.to_state.attributes.get('nfc_id', '') | string | lower | replace(':', '') | replace(' ', '') %}
+        {% set clean_allowed = (allowed_nfc_ids if allowed_nfc_ids is iterable and allowed_nfc_ids is not string else [allowed_nfc_ids])
+           | map('string') | map('lower') | map('replace', ':', '') | map('replace', ' ', '') | list %}
+        {{ enable_nfc and
+           trigger.to_state.attributes.event_type == 'scanned' and
+           raw_id != '' and
+           clean_allowed | length > 0 and
+           raw_id in clean_allowed }}
+      {% else %}
+        false
+      {% endif %}
 
 action:
   # 1. Unlock the door
@@ -94,7 +147,18 @@ action:
                   data:
                     title: "🔓 Door Unlocked"
                     message: >-
-                      Door unlocked by {{ trigger.to_state.attributes.full_name | default(trigger.to_state.attributes.user_id, true) }}.
+                      {% if trigger.id == 'fingerprint' %}
+                        Door unlocked via fingerprint ({{ trigger.to_state.attributes.full_name | default(trigger.to_state.attributes.user_id, true) }}).
+                      {% elif trigger.id == 'nfc' %}
+                        {% set person = trigger.to_state.attributes.full_name | default(trigger.to_state.attributes.user_id, false) %}
+                        {% if person %}
+                          Door unlocked via NFC card ({{ person }} - {{ trigger.to_state.attributes.nfc_id }}).
+                        {% else %}
+                          Door unlocked via NFC card (ID: {{ trigger.to_state.attributes.nfc_id }}).
+                        {% endif %}
+                      {% else %}
+                        Door unlocked.
+                      {% endif %}
 
   # 3. Execute any user-defined additional actions
   - sequence: !input custom_actions
