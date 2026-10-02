@@ -1,7 +1,7 @@
 blueprint:
   name: UniFi Protect Doorbell - Unlock Smart Lock via Fingerprint or NFC
   description: >
-    Unlocks a smart lock when an authorized fingerprint or NFC card is scanned on a
+    Unlocks a smart lock when an authorized fingerprint or approved NFC card is scanned on a
     UniFi Protect G4 Doorbell Pro. Hardened against reconnection replays, entity
     unavailability, and unauthorized scans.
   domain: automation
@@ -42,6 +42,7 @@ blueprint:
       description: >-
         List of authorized NFC Card UIDs permitted to unlock the lock (e.g. ABCDEF1234 or 04:12:ab:cd).
         Matching is case-insensitive and ignores colons/spaces. If empty, NFC unlocking is disallowed.
+        WARNING: Standard NFC card UIDs can be cloned. Only allow cards/fobs you physically control and verify.
       default: []
       selector:
         text:
