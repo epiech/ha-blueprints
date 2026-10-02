@@ -13,6 +13,7 @@ blueprint:
 
   domain: automation
   author: epiech
+  source_url: https://github.com/epiech/ha-blueprints/blob/main/blueprints/automation/motion_lighting/smart_bathroom_occupancy_lighting.yaml
   homeassistant:
     min_version: 2024.6.0
 
@@ -97,8 +98,7 @@ blueprint:
           selector:
             target:
               entity:
-                filter:
-                  domain: light
+                domain: light
 
         night_target_lights:
           name: Night Mode Target Lights (Optional)
@@ -107,8 +107,7 @@ blueprint:
           selector:
             target:
               entity:
-                filter:
-                  domain: light
+                domain: light
 
         additional_off_lights:
           name: Additional Lights to Turn OFF (Optional)
@@ -117,8 +116,7 @@ blueprint:
           selector:
             target:
               entity:
-                filter:
-                  domain: light
+                domain: light
 
         off_transition:
           name: Turn Off Transition (Seconds)
