@@ -1,619 +1,186 @@
 blueprint:
-  name: Smart Room & Bathroom Lighting (Occupancy, Multi-Sensor & Dynamic Color)
+  name: UniFi Protect Doorbell - Unlock Smart Lock via Fingerprint or NFC
   description: >
-    # 💡 Smart Room & Bathroom Lighting Automation
-
-    An advanced occupancy lighting blueprint inspired by modern smart bathroom & room automation:
-    - **Multi-Sensor Support**: Use multiple motion/presence sensors and door contact sensors.
-    - **Door & Privacy Protection**: Prevents lights turning off when doors are closed (e.g. taking a shower/bath or using the restroom).
-    - **Granular Lighting Control**: Individually configure brightness percentage, color temperature (Kelvin), or RGB color for Day vs. Night modes.
-    - **Multiple Light Targets**: Control main lights, a dedicated nightlight target (optional), and turn off additional lights (e.g., vanity lights) upon vacancy.
-    - **Environmental Intelligence**: Sun position check and illuminance threshold cutoff (lux).
-    - **Safety Overrides**: Supports an automation kill switch and a bath mode / keep-on bypass helper.
-
+    Unlocks a smart lock when an authorized fingerprint or approved NFC card is scanned on a
+    UniFi Protect G4 Doorbell Pro. Hardened against reconnection replays, entity
+    unavailability, and unauthorized scans.
   domain: automation
   author: epiech
-  source_url: https://github.com/epiech/ha-blueprints/blob/main/blueprints/automation/motion_lighting/smart_bathroom_occupancy_lighting.yaml
   homeassistant:
-    min_version: 2024.6.0
-
+    min_version: 2024.4.0
   input:
-    # -------------------------------------------------------------
-    # 1. SENSORS & DETECTION
-    # -------------------------------------------------------------
-    sensors_section:
-      name: "Sensors & Occupancy"
-      icon: mdi:motion-sensor
-      input:
-        motion_sensors:
-          name: Motion Sensors
-          description: One or more motion/presence sensors. Detecting motion will turn on lights and reset the vacancy countdown.
-          selector:
-            entity:
-              filter:
-                - domain: binary_sensor
-                  device_class:
-                    - motion
-                    - occupancy
-                    - presence
-              multiple: true
-
-        door_sensors:
-          name: Door Sensors
-          description: >
-            One or more door contact sensors (e.g. hallway door, closet door).
-            Opening any door immediately triggers occupancy.
-            Closing doors can protect privacy by keeping lights on.
-            (If your room has no door sensor, select your motion sensor here and choose "Ignore door states" below).
-          selector:
-            entity:
-              filter:
-                - domain: binary_sensor
-                  device_class:
-                    - door
-                    - opening
-                    - window
-              multiple: true
-
-        door_check_behavior:
-          name: Door Vacancy Behavior
-          description: >
-            How door state affects turning off lights when motion stops:
-            - **At least one door must be open** (Recommended for bathrooms: prevents lights from turning off while someone is showering or sitting still with doors closed).
-            - **All doors must be open**
-            - **Ignore door states** (Always turn off when motion clears).
-          default: any_open
-          selector:
-            select:
-              options:
-                - label: "At least one door must be open (Bathroom Privacy Mode)"
-                  value: any_open
-                - label: "All doors must be open"
-                  value: all_open
-                - label: "Ignore door states (Turn off when motion clears)"
-                  value: ignore
-
-        no_motion_wait:
-          name: No-Motion Timeout (Minutes)
-          description: How many minutes of no motion across ALL sensors before turning off the lights.
-          default: 10
-          selector:
-            number:
-              min: 1
-              max: 120
-              step: 1
-              unit_of_measurement: minutes
-              mode: box
-
-    # -------------------------------------------------------------
-    # 2. LIGHTS & TARGETS
-    # -------------------------------------------------------------
-    lights_section:
-      name: "Lights & Target Control"
-      icon: mdi:lightbulb-group
-      input:
-        target_lights:
-          name: Target Lights (Main / Daytime)
-          description: The primary lights to turn on when occupied during the day (supports multiple lights, groups, devices, or areas).
-          selector:
-            target:
-              entity:
-                domain: light
-
-        night_target_lights:
-          name: Night Mode Target Lights (Optional)
-          description: Specific lights to turn on during Night Mode (e.g. WLED strip, toe-kick nightlight). If not specified, controls the Target Lights above.
-          default: {}
-          selector:
-            target:
-              entity:
-                domain: light
-
-        additional_off_lights:
-          name: Additional Lights to Turn OFF (Optional)
-          description: Extra lights to turn off when vacancy/cleared occurs (e.g. vanity lights or overhead mirrors that may have been manually switched on).
-          default: {}
-          selector:
-            target:
-              entity:
-                domain: light
-
-        off_transition:
-          name: Turn Off Transition (Seconds)
-          description: Smooth fade-out duration when turning lights off.
-          default: 2
-          selector:
-            number:
-              min: 0
-              max: 30
-              step: 1
-              unit_of_measurement: seconds
-              mode: slider
-
-    # -------------------------------------------------------------
-    # 3. DAYTIME LIGHTING SETTINGS
-    # -------------------------------------------------------------
-    day_lighting_section:
-      name: "Daytime Lighting Settings"
-      icon: mdi:white-balance-sunny
-      input:
-        day_time_start:
-          name: Daytime Start Time
-          description: Time when daytime lighting schedule begins.
-          default: "06:00:00"
-          selector:
-            time: {}
-
-        day_time_end:
-          name: Daytime End Time
-          description: Time when daytime lighting schedule ends.
-          default: "22:00:00"
-          selector:
-            time: {}
-
-        check_sun:
-          name: Require Sun Above Horizon
-          description: If enabled, daytime lights will only turn on when the sun is above the horizon.
-          default: true
-          selector:
-            boolean: {}
-
-        illuminance_sensor:
-          name: Illuminance Sensor (Optional)
-          description: Ambient lux sensor. If set, daytime lights will only turn on when illuminance is below the cutoff threshold.
-          default: []
-          selector:
-            entity:
-              filter:
-                - domain: sensor
-                  device_class: illuminance
-
-        illuminance_cutoff:
-          name: Illuminance Cutoff (Lux)
-          description: Lights only turn on if ambient light is below this level.
-          default: 25
-          selector:
-            number:
-              min: 1
-              max: 1000
-              step: 1
-              unit_of_measurement: lx
-              mode: box
-
-        day_brightness:
-          name: Daytime Brightness
-          description: Brightness percentage for daytime lighting.
-          default: 80
-          selector:
-            number:
-              min: 1
-              max: 100
-              step: 1
-              unit_of_measurement: "%"
-              mode: slider
-
-        day_color_mode:
-          name: Daytime Color Mode
-          description: Choose whether to set a Color Temperature (Kelvin), RGB Color, or leave color untouched (brightness only).
-          default: rgb
-          selector:
-            select:
-              options:
-                - label: "Color Temperature (Kelvin)"
-                  value: color_temp
-                - label: "RGB Color"
-                  value: rgb
-                - label: "Default / Don't Change Color"
-                  value: none
-
-        day_color_temp:
-          name: Daytime Color Temperature (Kelvin)
-          description: Color temperature to use if Daytime Color Mode is set to Color Temperature.
-          default: 4000
-          selector:
-            number:
-              min: 2000
-              max: 6500
-              step: 100
-              unit_of_measurement: K
-              mode: slider
-
-        day_rgb_color:
-          name: Daytime RGB Color
-          description: RGB color to use if Daytime Color Mode is set to RGB Color.
-          default: [255, 255, 255]
-          selector:
-            color_rgb: {}
-
-        day_transition:
-          name: Daytime Turn On Transition (Seconds)
-          description: Fade-in duration when turning on daytime lights.
-          default: 1
-          selector:
-            number:
-              min: 0
-              max: 30
-              step: 1
-              unit_of_measurement: seconds
-              mode: slider
-
-    # -------------------------------------------------------------
-    # 4. NIGHT MODE LIGHTING SETTINGS
-    # -------------------------------------------------------------
-    night_lighting_section:
-      name: "Night Mode Lighting Settings"
-      icon: mdi:weather-night
-      input:
-        night_mode_boolean:
-          name: Night Mode Helper (Optional)
-          description: An input_boolean that indicates Night Mode is active (e.g. input_boolean.night_mode).
-          default: []
-          selector:
-            entity:
-              filter:
-                - domain: input_boolean
-
-        night_time_start:
-          name: Night Schedule Start Time
-          description: Time when night lighting schedule begins (used if Night Mode helper is not active).
-          default: "22:00:00"
-          selector:
-            time: {}
-
-        night_time_end:
-          name: Night Schedule End Time
-          description: Time when night lighting schedule ends.
-          default: "06:00:00"
-          selector:
-            time: {}
-
-        night_brightness:
-          name: Night Brightness
-          description: Brightness percentage for night lighting.
-          default: 15
-          selector:
-            number:
-              min: 1
-              max: 100
-              step: 1
-              unit_of_measurement: "%"
-              mode: slider
-
-        night_color_mode:
-          name: Night Color Mode
-          description: Choose whether to set RGB Color, Color Temperature (Kelvin), or leave color untouched (brightness only).
-          default: rgb
-          selector:
-            select:
-              options:
-                - label: "RGB Color"
-                  value: rgb
-                - label: "Color Temperature (Kelvin)"
-                  value: color_temp
-                - label: "Default / Don't Change Color"
-                  value: none
-
-        night_rgb_color:
-          name: Night RGB Color
-          description: RGB color to use if Night Color Mode is set to RGB Color (defaults to red nightlight).
-          default: [255, 0, 0]
-          selector:
-            color_rgb: {}
-
-        night_color_temp:
-          name: Night Color Temperature (Kelvin)
-          description: Color temperature to use if Night Color Mode is set to Color Temperature.
-          default: 2200
-          selector:
-            number:
-              min: 2000
-              max: 6500
-              step: 100
-              unit_of_measurement: K
-              mode: slider
-
-        night_transition:
-          name: Night Turn On Transition (Seconds)
-          description: Fade-in duration when turning on night lights.
-          default: 1
-          selector:
-            number:
-              min: 0
-              max: 30
-              step: 1
-              unit_of_measurement: seconds
-              mode: slider
-
-    # -------------------------------------------------------------
-    # 5. OVERRIDES & SAFETY
-    # -------------------------------------------------------------
-    overrides_section:
-      name: "Overrides & Safety Bypasses"
-      icon: mdi:shield-lock-outline
-      input:
-        bypass_boolean:
-          name: Bath Mode / Stay-On Bypass Helper (Optional)
-          description: An input_boolean or switch (e.g. input_boolean.input_boolean_jakes_bath_mode). When ON, lights will NOT automatically turn off.
-          default: []
-          selector:
-            entity:
-              filter:
-                - domain:
-                    - input_boolean
-                    - switch
-
-        kill_switch:
-          name: Automation Kill Switch (Optional)
-          description: An input_boolean to disable this automation. When ON, this automation will not run.
-          default: []
-          selector:
-            entity:
-              filter:
-                - domain: input_boolean
-
-        custom_actions_occupied:
-          name: Custom Actions on Occupancy (Optional)
-          description: Extra actions to execute when the room becomes occupied.
-          default: []
-          selector:
-            action: {}
-
-        custom_actions_cleared:
-          name: Custom Actions on Vacancy (Optional)
-          description: Extra actions to run when the room turns off / clears.
-          default: []
-          selector:
-            action: {}
-
-# Restart mode allows resetting the vacancy countdown as soon as motion or door activity is detected
-mode: restart
-max_exceeded: silent
+    fingerprint_entity:
+      name: Fingerprint Sensor Entity
+      description: The fingerprint event entity from your UniFi Doorbell Pro (e.g. event.g4_doorbell_pro_fingerprint).
+      selector:
+        entity:
+          filter:
+            - domain: event
+              integration: unifiprotect
+    enable_fingerprint:
+      name: Enable Fingerprint Unlock
+      description: Allow authorized fingerprints to unlock the smart lock.
+      default: true
+      selector:
+        boolean: {}
+    nfc_entity:
+      name: NFC Sensor Entity
+      description: The NFC event entity from your UniFi Doorbell Pro (e.g. event.g4_doorbell_pro_nfc).
+      selector:
+        entity:
+          filter:
+            - domain: event
+              integration: unifiprotect
+    enable_nfc:
+      name: Enable NFC Unlock
+      description: Allow authorized NFC cards to unlock the smart lock.
+      default: true
+      selector:
+        boolean: {}
+    allowed_nfc_ids:
+      name: Authorized NFC Card IDs
+      description: >-
+        List of authorized NFC Card UIDs. You can optionally include a friendly name
+        (e.g., "62B13DE4: Eric", "62B13DE4 (Eric)", or just "62B13DE4").
+        Matching is case-insensitive. WARNING: Standard NFC card UIDs can be cloned.
+      default: []
+      selector:
+        text:
+          multiple: true
+    lock_entity:
+      name: Smart Lock
+      description: The smart lock to unlock when authorized biometric or NFC credentials are scanned.
+      selector:
+        entity:
+          filter:
+            - domain: lock
+    notify_devices:
+      name: Mobile App Notification (Optional)
+      description: Mobile app devices to receive a push notification when the door is unlocked.
+      default: []
+      selector:
+        device:
+          filter:
+            - integration: mobile_app
+          multiple: true
+    custom_actions:
+      name: Additional Actions (Optional)
+      description: Extra actions to run upon successful unlock (e.g., turn on a hallway light, play a chime, disarm an alarm).
+      default: []
+      selector:
+        action: {}
 
 variables:
-  motion_sensors: !input motion_sensors
-  door_sensors: !input door_sensors
-  door_check_behavior: !input door_check_behavior
-  no_motion_wait: !input no_motion_wait
-  check_sun: !input check_sun
-  illuminance_sensor: !input illuminance_sensor
-  illuminance_cutoff: !input illuminance_cutoff
-  night_mode_boolean: !input night_mode_boolean
-  bypass_boolean: !input bypass_boolean
-  kill_switch: !input kill_switch
-  day_color_mode: !input day_color_mode
-  night_color_mode: !input night_color_mode
-  night_target: !input night_target_lights
-  has_night_target: "{{ night_target != {} and (night_target.entity_id is defined or night_target.device_id is defined or night_target.area_id is defined) }}"
-  additional_off: !input additional_off_lights
-  has_additional_off: "{{ additional_off != {} and (additional_off.entity_id is defined or additional_off.device_id is defined or additional_off.area_id is defined) }}"
+  enable_fingerprint: !input enable_fingerprint
+  enable_nfc: !input enable_nfc
+  allowed_nfc_ids: !input allowed_nfc_ids
+  notify_devices: !input notify_devices
+
+mode: single
 
 trigger:
   - platform: state
-    entity_id: !input motion_sensors
-    to: "on"
-    id: occupied
+    entity_id: !input fingerprint_entity
+    id: fingerprint
   - platform: state
-    entity_id: !input door_sensors
-    to: "on"
-    id: occupied
-  - platform: state
-    entity_id: !input motion_sensors
-    to: "off"
-    for:
-      minutes: !input no_motion_wait
-    id: cleared
+    entity_id: !input nfc_entity
+    id: nfc
 
 condition:
-  # Global safety: Ensure Kill Switch is not active
+  # 1. Guard against restarts & reconnects (ignore transitions from/to unavailable or unknown, or restored state)
   - condition: template
     value_template: >-
-      {{ kill_switch == [] or kill_switch == none or kill_switch == '' or is_state(kill_switch, 'off') }}
+      {{ trigger.from_state is defined and
+         trigger.from_state.state not in ['unavailable', 'unknown'] and
+         not trigger.from_state.attributes.get('restored', false) and
+         trigger.to_state is defined and
+         trigger.to_state.state not in ['unavailable', 'unknown'] }}
+
+  # 2. Ensure state timestamp actually changed (not a replayed or attribute-only event)
+  - condition: template
+    value_template: >-
+      {{ trigger.from_state.state != trigger.to_state.state }}
+
+  # 3. Check event freshness against the actual scan time with clock skew tolerance
+  - condition: template
+    value_template: >-
+      {{ (as_timestamp(now()) - as_timestamp(trigger.to_state.state, default=0)) | abs < 15 }}
+
+  # 4. Authorize based on trigger type (Fingerprint vs NFC)
+  - condition: template
+    value_template: >-
+      {% set fp_enabled = true if enable_fingerprint is not defined or enable_fingerprint in [none, ''] else enable_fingerprint %}
+      {% set nfc_enabled = true if enable_nfc is not defined or enable_nfc in [none, ''] else enable_nfc %}
+      {% if trigger.id == 'fingerprint' %}
+        {% set fp_user = trigger.to_state.attributes.get('ulp_id') or trigger.to_state.attributes.get('user_id') or trigger.to_state.attributes.get('full_name') %}
+        {{ fp_enabled and
+           trigger.to_state.attributes.event_type == 'identified' and
+           fp_user is defined and
+           fp_user not in ['', none, 'unknown'] }}
+      {% elif trigger.id == 'nfc' %}
+        {% set raw_id = trigger.to_state.attributes.get('nfc_id', '') | string | lower | replace(':', '') | replace(' ', '') %}
+        {% set ns = namespace(found=false) %}
+        {% for entry in (allowed_nfc_ids if allowed_nfc_ids is iterable and allowed_nfc_ids is not string else [allowed_nfc_ids]) %}
+          {% set clean_entry = entry | string | lower | replace(':', '') | replace(' ', '') %}
+          {% if raw_id != '' and (raw_id in clean_entry or clean_entry in raw_id) %}
+            {% set ns.found = true %}
+          {% endif %}
+        {% endfor %}
+        {{ nfc_enabled and
+           trigger.to_state.attributes.event_type == 'scanned' and
+           raw_id != '' and
+           ns.found }}
+      {% else %}
+        false
+      {% endif %}
 
 action:
+  # 1. Unlock the door
+  - action: lock.unlock
+    target:
+      entity_id: !input lock_entity
+
+  # 2. Send push notifications if mobile devices were selected
   - choose:
-      # =========================================================
-      # 1. NIGHT MODE LIGHTING
-      # =========================================================
-      - alias: "Night Mode Lighting"
-        conditions:
-          - condition: trigger
-            id: occupied
-          - condition: or
-            conditions:
-              - condition: template
-                value_template: >-
-                  {{ night_mode_boolean != [] and night_mode_boolean != none and night_mode_boolean != '' and is_state(night_mode_boolean, 'on') }}
-              - condition: time
-                after: !input night_time_start
-                before: !input night_time_end
+      - conditions:
+          - condition: template
+            value_template: "{{ notify_devices | length > 0 }}"
         sequence:
-          - choose:
-              # Case A: Separate Night Target Lights Specified
-              - conditions:
-                  - condition: template
-                    value_template: "{{ has_night_target }}"
-                sequence:
-                  - choose:
-                      - conditions:
-                          - condition: template
-                            value_template: "{{ night_color_mode == 'rgb' }}"
-                        sequence:
-                          - action: light.turn_on
-                            target: !input night_target_lights
-                            data:
-                              brightness_pct: !input night_brightness
-                              rgb_color: !input night_rgb_color
-                              transition: !input night_transition
-                      - conditions:
-                          - condition: template
-                            value_template: "{{ night_color_mode == 'color_temp' }}"
-                        sequence:
-                          - action: light.turn_on
-                            target: !input night_target_lights
-                            data:
-                              brightness_pct: !input night_brightness
-                              color_temp_kelvin: !input night_color_temp
-                              transition: !input night_transition
-                    default:
-                      - action: light.turn_on
-                        target: !input night_target_lights
-                        data:
-                          brightness_pct: !input night_brightness
-                          transition: !input night_transition
-            # Case B: Fallback to Target Lights
-            default:
-              - choose:
-                  - conditions:
-                      - condition: template
-                        value_template: "{{ night_color_mode == 'rgb' }}"
-                    sequence:
-                      - action: light.turn_on
-                        target: !input target_lights
-                        data:
-                          brightness_pct: !input night_brightness
-                          rgb_color: !input night_rgb_color
-                          transition: !input night_transition
-                  - conditions:
-                      - condition: template
-                        value_template: "{{ night_color_mode == 'color_temp' }}"
-                    sequence:
-                      - action: light.turn_on
-                        target: !input target_lights
-                        data:
-                          brightness_pct: !input night_brightness
-                          color_temp_kelvin: !input night_color_temp
-                          transition: !input night_transition
-                default:
-                  - action: light.turn_on
-                    target: !input target_lights
-                    data:
-                      brightness_pct: !input night_brightness
-                      transition: !input night_transition
-          - sequence: !input custom_actions_occupied
+          - repeat:
+              for_each: !input notify_devices
+              sequence:
+                - action: notify.send_message
+                  target:
+                    device_id: "{{ repeat.item }}"
+                  data:
+                    title: "🔓 Door Unlocked"
+                    message: >-
+                      {% if trigger.id == 'fingerprint' %}
+                        Door unlocked via fingerprint ({{ trigger.to_state.attributes.full_name | default(trigger.to_state.attributes.get('ulp_id'), true) | default(trigger.to_state.attributes.get('user_id'), true) }}).
+                      {% elif trigger.id == 'nfc' %}
+                        {% set raw_id = trigger.to_state.attributes.get('nfc_id', '') | string | lower | replace(':', '') | replace(' ', '') %}
+                        {% set ns = namespace(name='') %}
+                        {% for entry in (allowed_nfc_ids if allowed_nfc_ids is iterable and allowed_nfc_ids is not string else [allowed_nfc_ids]) %}
+                          {% set clean_entry = entry | string | lower | replace(':', '') | replace(' ', '') %}
+                          {% if raw_id != '' and raw_id in clean_entry %}
+                            {% if ':' in (entry | string) %}
+                              {% set ns.name = (entry | string).split(':')[-1] | trim %}
+                            {% elif '-' in (entry | string) %}
+                              {% set ns.name = (entry | string).split('-')[-1] | trim %}
+                            {% elif '(' in (entry | string) and ')' in (entry | string) %}
+                              {% set ns.name = (entry | string).split('(')[1].split(')')[0] | trim %}
+                            {% endif %}
+                          {% endif %}
+                        {% endfor %}
+                        {% set person = ns.name | default(trigger.to_state.attributes.get('full_name'), true) | default(trigger.to_state.attributes.get('ulp_id'), false) %}
+                        {% if person %}
+                          Door unlocked via NFC card ({{ person }}).
+                        {% else %}
+                          Door unlocked via NFC card (ID: {{ trigger.to_state.attributes.nfc_id }}).
+                        {% endif %}
+                      {% else %}
+                        Door unlocked.
+                      {% endif %}
 
-      # =========================================================
-      # 2. DAYTIME LIGHTING
-      # =========================================================
-      - alias: "Daytime Lighting"
-        conditions:
-          - condition: trigger
-            id: occupied
-          # Must not be Night Mode
-          - condition: template
-            value_template: >-
-              {{ night_mode_boolean == [] or night_mode_boolean == none or night_mode_boolean == '' or is_state(night_mode_boolean, 'off') }}
-          - condition: time
-            after: !input day_time_start
-            before: !input day_time_end
-          # Sun elevation condition (if enabled)
-          - condition: template
-            value_template: >-
-              {% if check_sun %}
-                {{ is_state('sun.sun', 'above_horizon') }}
-              {% else %}
-                true
-              {% endif %}
-          # Illuminance threshold condition (if sensor configured)
-          - condition: template
-            value_template: >-
-              {% if illuminance_sensor != [] and illuminance_sensor != none and illuminance_sensor != '' %}
-                {{ states(illuminance_sensor) | float(999999) < (illuminance_cutoff | float) }}
-              {% else %}
-                true
-              {% endif %}
-        sequence:
-          - choose:
-              - conditions:
-                  - condition: template
-                    value_template: "{{ day_color_mode == 'color_temp' }}"
-                sequence:
-                  - action: light.turn_on
-                    target: !input target_lights
-                    data:
-                      brightness_pct: !input day_brightness
-                      color_temp_kelvin: !input day_color_temp
-                      transition: !input day_transition
-              - conditions:
-                  - condition: template
-                    value_template: "{{ day_color_mode == 'rgb' }}"
-                sequence:
-                  - action: light.turn_on
-                    target: !input target_lights
-                    data:
-                      brightness_pct: !input day_brightness
-                      rgb_color: !input day_rgb_color
-                      transition: !input day_transition
-            default:
-              - action: light.turn_on
-                target: !input target_lights
-                data:
-                  brightness_pct: !input day_brightness
-                  transition: !input day_transition
-          - sequence: !input custom_actions_occupied
-
-      # =========================================================
-      # 3. AUTO-OFF WHEN CLEARED (VACANCY)
-      # =========================================================
-      - alias: "Auto-Off When Cleared"
-        conditions:
-          - condition: trigger
-            id: cleared
-          # Bypass check (e.g. Bath Mode active)
-          - condition: template
-            value_template: >-
-              {{ bypass_boolean == [] or bypass_boolean == none or bypass_boolean == '' or is_state(bypass_boolean, 'off') }}
-          # Door Privacy Check
-          - condition: template
-            value_template: >-
-              {% if door_check_behavior == 'any_open' %}
-                {{ expand(door_sensors) | selectattr('state', 'eq', 'on') | list | count > 0 }}
-              {% elif door_check_behavior == 'all_open' %}
-                {{ expand(door_sensors) | rejectattr('state', 'eq', 'on') | list | count == 0 }}
-              {% else %}
-                true
-              {% endif %}
-          # Multi-Sensor Check 1: Ensure NO motion sensor is currently active ('on')
-          - condition: template
-            value_template: >-
-              {{ expand(motion_sensors) | selectattr('state', 'eq', 'on') | list | count == 0 }}
-          # Multi-Sensor Check 2: Ensure ALL motion sensors have been off for at least the timeout duration
-          - condition: template
-            value_template: >-
-              {% set wait_seconds = no_motion_wait * 60 %}
-              {% set ns = namespace(recent_motion=0) %}
-              {% for s in expand(motion_sensors) %}
-                {% if s.last_changed is defined and (as_timestamp(now()) - as_timestamp(s.last_changed)) < (wait_seconds - 5) %}
-                  {% set ns.recent_motion = ns.recent_motion + 1 %}
-                {% endif %}
-              {% endfor %}
-              {{ ns.recent_motion == 0 }}
-        sequence:
-          # Turn off primary target lights
-          - action: light.turn_off
-            target: !input target_lights
-            data:
-              transition: !input off_transition
-
-          # Turn off night target lights if separately specified
-          - choose:
-              - conditions:
-                  - condition: template
-                    value_template: "{{ has_night_target }}"
-                sequence:
-                  - action: light.turn_off
-                    target: !input night_target_lights
-                    data:
-                      transition: !input off_transition
-
-          # Turn off any additional lights (e.g. vanity lights)
-          - choose:
-              - conditions:
-                  - condition: template
-                    value_template: "{{ has_additional_off }}"
-                sequence:
-                  - action: light.turn_off
-                    target: !input additional_off_lights
-                    data:
-                      transition: !input off_transition
-
-          - sequence: !input custom_actions_cleared
+  # 3. Execute any user-defined additional actions
+  - sequence: !input custom_actions
