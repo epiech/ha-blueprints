@@ -54,7 +54,7 @@ Click the badge below to import directly into your Home Assistant instance:
 
 2. **How do I find my NFC card or tag UID?**
    1. Scan your card, fob, or phone at the G4 Doorbell Pro reader.
-   2. In Home Assistant, navigate to **Developer Tools** > **States**.
+   2. In Home Assistant, navigate to **Settings** > **Tools** > **States** (or **Developer Tools** > **States** in older versions).
    3. Search for your NFC entity (e.g., `event.g4_doorbell_pro_nfc`).
    4. Locate the `nfc_id` attribute. Copy that value (e.g., `ABCDEF1234` or `04:12:a3:b4`) into the **Authorized NFC Card IDs** field of your automation.
 
