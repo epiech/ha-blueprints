@@ -58,7 +58,7 @@ action:
       command: '{{ trigger.to_state.state }}'
   - choose:
       - conditions:
-          - '{{ command == "on" or command == "brightness_move_to_level" }}'
+          - '{{ command == "brightness_move_to_level" and trigger.to_state.attributes.action_level | int(-1) > 0 }}'
         sequence: !input button_top
       - conditions:
           - '{{ command == "brightness_step_up" }}'
@@ -67,7 +67,7 @@ action:
           - '{{ command == "brightness_step_down" }}'
         sequence: !input button_down
       - conditions:
-          - '{{ command == "off" }}'
+          - '{{ command == "brightness_move_to_level" and trigger.to_state.attributes.action_level | int(-1) == 0 }}'
         sequence: !input button_bottom
       - conditions:
           - '{{ command == "brightness_stop" }}'
