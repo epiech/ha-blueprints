@@ -5,7 +5,7 @@ Automate your Lutron Connected Bulb Remote (LZL-4B / LZL4BWHL01) directly throug
 > [!WARNING]
 > **Not for Caséta**: This blueprint is strictly for the Zigbee-based Connected Bulb Remote (LZL-4B-WH-L01), not the proprietary Lutron Caséta Pico remotes, which require the Lutron Smart Bridge.
 
-[![Open your Home Assistant instance and show the blueprint import dialog with a specific blueprint pre-filled.](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fepiech%2Fha-blueprints%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Flutron%2Fz2m%2Fconnected_bulb_remote%2Fconnected_bulb_remote.yaml)
+[![Open your Home Assistant instance and show the blueprint import dialog with a specific blueprint pre-filled.](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fepiech%2Fha-blueprints%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Flutron%2Fz2m%2Fconnected_bulb_remote.yaml)
 
 > [!NOTE]
 > This blueprint requires Zigbee2MQTT and relies on the automatically generated MQTT device `action` sensor entity. Ensure your remote is successfully paired and reporting actions to Z2M before using this blueprint.
@@ -26,14 +26,14 @@ Automate your Lutron Connected Bulb Remote (LZL-4B / LZL4BWHL01) directly throug
 #### Method 1: My Home Assistant (One-Click)
 Click the badge below to import directly into your Home Assistant instance:
 
-[![Open your Home Assistant instance and show the blueprint import dialog with a specific blueprint pre-filled.](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fepiech%2Fha-blueprints%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Flutron%2Fz2m%2Fconnected_bulb_remote%2Fconnected_bulb_remote.yaml)
+[![Open your Home Assistant instance and show the blueprint import dialog with a specific blueprint pre-filled.](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fepiech%2Fha-blueprints%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Flutron%2Fz2m%2Fconnected_bulb_remote.yaml)
 
 #### Method 2: Manual Import via URL
 1. In Home Assistant, navigate to **Settings** > **Automations & Scenes** > **Blueprints**.
 2. Click **Import Blueprint** (bottom right).
 3. Paste the blueprint URL into the dialog:
 ```text
-https://github.com/epiech/ha-blueprints/blob/main/blueprints/automation/lutron/z2m/connected_bulb_remote/connected_bulb_remote.yaml
+https://github.com/epiech/ha-blueprints/blob/main/blueprints/automation/lutron/z2m/connected_bulb_remote.yaml
 ```
 4. Click Preview Blueprint, then click Import Blueprint.
 
