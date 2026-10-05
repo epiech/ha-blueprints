@@ -1,0 +1,75 @@
+blueprint:
+  name: Z2M - Lutron Connected Bulb Remote (LZL-4B)
+  description: Automate your Lutron Connected Bulb Remote (LZL-4B) connected via Zigbee2MQTT.
+  domain: automation
+  input:
+    remote:
+      name: Remote Action Sensor
+      description: The action sensor of your LZL-4B remote (e.g., sensor.living_room_remote_action). This sensor is automatically created by Zigbee2MQTT.
+      selector:
+        entity:
+          domain: sensor
+          multiple: false
+    button_top:
+      name: Top Button Press (Turn On)
+      description: Action to run when the top button is pressed.
+      default: []
+      selector:
+        action: {}
+    button_up:
+      name: Up Button Press (Dim Up)
+      description: Action to run when the up arrow button is pressed.
+      default: []
+      selector:
+        action: {}
+    button_down:
+      name: Down Button Press (Dim Down)
+      description: Action to run when the down arrow button is pressed.
+      default: []
+      selector:
+        action: {}
+    button_bottom:
+      name: Bottom Button Press (Turn Off)
+      description: Action to run when the bottom button is pressed.
+      default: []
+      selector:
+        action: {}
+    button_stop:
+      name: Button Release (Stop Dimming)
+      description: Action to run when you release the dim up or down buttons. This is useful for stopping a smooth dimming action.
+      default: []
+      selector:
+        action: {}
+
+mode: restart
+max_exceeded: silent
+
+trigger:
+  - platform: state
+    entity_id: !input remote
+
+condition:
+  - condition: template
+    value_template: >-
+      {{ trigger.to_state.state not in ("", "None", "unknown", "unavailable") }}
+
+action:
+  - variables:
+      command: '{{ trigger.to_state.state }}'
+  - choose:
+      - conditions:
+          - '{{ command == "on" or command == "brightness_move_to_level" }}'
+        sequence: !input button_top
+      - conditions:
+          - '{{ command == "brightness_step_up" }}'
+        sequence: !input button_up
+      - conditions:
+          - '{{ command == "brightness_step_down" }}'
+        sequence: !input button_down
+      - conditions:
+          - '{{ command == "off" }}'
+        sequence: !input button_bottom
+      - conditions:
+          - '{{ command == "brightness_stop" }}'
+        sequence: !input button_stop
+
