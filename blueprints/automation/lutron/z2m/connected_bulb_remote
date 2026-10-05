@@ -1,5 +1,5 @@
 blueprint:
-  name: Z2M - Lutron Connected Bulb Remote (LZL-4B)
+  name: Connected Bulb Remote
   description: Automate your Lutron Connected Bulb Remote (LZL-4B) connected via Zigbee2MQTT.
   domain: automation
   input:
