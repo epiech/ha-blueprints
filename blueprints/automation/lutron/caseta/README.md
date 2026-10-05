@@ -22,14 +22,14 @@ Automate your standard 5-Button Lutron Caséta Pico Remote (e.g., PJ2-3BRL) thro
 #### Method 1: My Home Assistant (One-Click)
 Click the badge below to import directly into your Home Assistant instance:
 
-[![Open your Home Assistant instance and show the blueprint import dialog with a specific blueprint pre-filled.](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fepiech%2Fha-blueprints%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Flutron%2Fcaseta%2F5_Button_pico_remote%2Fcaseta_pico_5_button_blueprint.yaml)
+[![Open your Home Assistant instance and show the blueprint import dialog with a specific blueprint pre-filled.](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fepiech%2Fha-blueprints%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Flutron%2Fcaseta%2F5_Button_pico_remote_blueprint.yaml)
 
 #### Method 2: Manual Import via URL
 1. In Home Assistant, navigate to **Settings** > **Automations & Scenes** > **Blueprints**.
 2. Click **Import Blueprint** (bottom right).
 3. Paste the blueprint URL into the dialog:
 ```text
-https://github.com/epiech/ha-blueprints/blob/main/blueprints/automation/lutron/caseta/5_Button_pico_remote/caseta_pico_5button_blueprint.yaml
+https://github.com/epiech/ha-blueprints/blob/main/blueprints/automation/lutron/caseta/5_Button_pico_remote.yaml
 ```
 4. Click Preview Blueprint, then click Import Blueprint.
 
