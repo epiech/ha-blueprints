@@ -105,4 +105,3 @@ action:
           - condition: trigger
             id: 'off'
         sequence: !input button_off
-
