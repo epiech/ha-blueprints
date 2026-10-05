@@ -5,7 +5,7 @@ blueprint:
   input:
     pico_remote:
       name: Pico Remote
-      description: The Pico remote to use. (Note: If your remote isn't showing up, go to Settings -> Devices & Services -> Lutron Caséta -> Devices, select your Pico, and ensure its entities are enabled).
+      description: "The Pico remote to use. (Note: If your remote isn't showing up, go to Settings -> Devices & Services -> Lutron Caséta -> Devices, select your Pico, and ensure its entities are enabled)."
       selector:
         device:
           integration: lutron_caseta
