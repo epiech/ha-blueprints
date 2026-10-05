@@ -1,0 +1,108 @@
+blueprint:
+  name: Lutron Caséta - 5-Button Pico Remote
+  description: Automate your 5-Button Lutron Caséta Pico Remote (e.g. PJ2-3BRL) using the official Lutron Caséta integration.
+  domain: automation
+  input:
+    pico_remote:
+      name: Pico Remote
+      description: The Pico remote to use. (Note: If your remote isn't showing up, go to Settings -> Devices & Services -> Lutron Caséta -> Devices, select your Pico, and ensure its entities are enabled).
+      selector:
+        device:
+          integration: lutron_caseta
+          multiple: false
+    button_on:
+      name: "On Button Press"
+      description: Action to run when the top 'On' button is pressed.
+      default: []
+      selector:
+        action: {}
+    button_up:
+      name: "Up Button Press"
+      description: Action to run when the 'Up' button is pressed.
+      default: []
+      selector:
+        action: {}
+    button_favorite:
+      name: "Favorite (Center) Button Press"
+      description: Action to run when the round center 'Favorite' button is pressed.
+      default: []
+      selector:
+        action: {}
+    button_down:
+      name: "Down Button Press"
+      description: Action to run when the 'Down' button is pressed.
+      default: []
+      selector:
+        action: {}
+    button_off:
+      name: "Off Button Press"
+      description: Action to run when the bottom 'Off' button is pressed.
+      default: []
+      selector:
+        action: {}
+
+mode: restart
+max_exceeded: silent
+
+trigger:
+  - platform: device
+    device_id: !input pico_remote
+    domain: lutron_caseta
+    type: press
+    subtype: 'on'
+    id: 'on'
+  - platform: device
+    device_id: !input pico_remote
+    domain: lutron_caseta
+    type: press
+    subtype: 'up'
+    id: 'up'
+  - platform: device
+    device_id: !input pico_remote
+    domain: lutron_caseta
+    type: press
+    subtype: 'favorite'
+    id: 'favorite'
+  # Some versions of the integration expose the center button as 'stop'
+  - platform: device
+    device_id: !input pico_remote
+    domain: lutron_caseta
+    type: press
+    subtype: 'stop'
+    id: 'favorite'
+  - platform: device
+    device_id: !input pico_remote
+    domain: lutron_caseta
+    type: press
+    subtype: 'down'
+    id: 'down'
+  - platform: device
+    device_id: !input pico_remote
+    domain: lutron_caseta
+    type: press
+    subtype: 'off'
+    id: 'off'
+
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: 'on'
+        sequence: !input button_on
+      - conditions:
+          - condition: trigger
+            id: 'up'
+        sequence: !input button_up
+      - conditions:
+          - condition: trigger
+            id: 'favorite'
+        sequence: !input button_favorite
+      - conditions:
+          - condition: trigger
+            id: 'down'
+        sequence: !input button_down
+      - conditions:
+          - condition: trigger
+            id: 'off'
+        sequence: !input button_off
+
