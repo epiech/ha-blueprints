@@ -14,10 +14,10 @@ Automate your Lutron Connected Bulb Remote (LZL-4B / LZL4BWHL01) directly throug
 
 ### 🎯 Features
 
-- **Full Button Mapping**: Map the Top, Up, Down, and Bottom buttons to any action (e.g. toggling lights, calling scripts, controlling media).
-- **Hold & Release Support**: Binds the `brightness_stop` event when you release the Up or Down buttons, allowing you to create smooth dimming transitions.
+- **Full Button Mapping**: Map the Top, Up, Down, and Bottom buttons to absolutely any Home Assistant action.
+- **Universal Action Support**: You are not limited to lights! Run any sequence of actions on button presses, including calling scripts, toggling fans, locking doors, setting scenes, running conditionals, or sending notifications.
+- **Hold & Release Support**: Binds the `brightness_stop` event when you release the Up or Down buttons, allowing you to create smooth dimming transitions or stop long-running scripts.
 - **Hub-Free Zigbee Integration**: Leverages Zigbee2MQTT to integrate directly with Home Assistant without requiring the Lutron Caséta Smart Bridge.
-- **Universal Action Support**: Run any sequence of actions on button presses, including conditions, loops, and script calls.
 
 ---
 
@@ -52,3 +52,6 @@ https://github.com/epiech/ha-blueprints/blob/main/blueprints/automation/lutron/z
 
 4. **Is this compatible with ZHA?**
    - No. This specific blueprint is built around the `action` sensor state provided by Zigbee2MQTT. ZHA handles button events differently via the `zha_event` event bus.
+
+5. **Can I use this to run scripts or control non-lighting devices?**
+   - **Yes!** The inputs in this blueprint use the native Home Assistant `action` selector. This means you can assign absolutely anything to a button press. When configuring the blueprint in the UI, simply click **Add Action** and choose **Call Service** to run a script, toggle a fan, lock a door, or activate a scene.
