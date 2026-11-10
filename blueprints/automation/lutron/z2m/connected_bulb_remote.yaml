@@ -2,6 +2,8 @@ blueprint:
   name: Z2M - Lutron Connected Bulb Remote (LZL-4B)
   description: Automate your Lutron Connected Bulb Remote (LZL-4B) connected via Zigbee2MQTT.
   domain: automation
+  author: epiech
+  source_url: https://github.com/epiech/ha-blueprints/blob/main/blueprints/automation/lutron/z2m/connected_bulb_remote.yaml
   input:
     remote:
       name: Remote Action Sensor
