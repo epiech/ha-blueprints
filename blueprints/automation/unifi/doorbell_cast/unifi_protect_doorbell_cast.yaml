@@ -6,52 +6,56 @@ blueprint:
     If pressed again while streaming, the timer resets.
   domain: automation
   author: epiech
-  source_url: https://github.com/epiech/ha-blueprints/blob/main/blueprints/automation/unifi_protect_doorbell_cast.yaml
+  source_url: https://github.com/epiech/ha-blueprints/blob/main/blueprints/automation/unifi/doorbell_cast/unifi_protect_doorbell_cast.yaml
   homeassistant:
-    min_version: 2024.4.0
+    min_version: 2026.7.0
   input:
     doorbell_entity:
       name: Doorbell Ring Entity
       description: >
-        The doorbell ring sensor from UniFi Protect. Can be the 'Last Doorbell Ring' timestamp sensor
-        (e.g. sensor.g4_doorbell_pro_last_doorbell_ring) or the doorbell binary sensor / event.
+        The doorbell event entity from UniFi Protect (e.g. event.g4_doorbell_pro_poe_doorbell).
       selector:
         entity:
           filter:
             - integration: unifiprotect
-              domain: sensor
-              device_class: timestamp
-            - integration: unifiprotect
-              domain: binary_sensor
-              device_class: occupancy
-            - integration: unifiprotect
-              domain: binary_sensor
+              domain:
+                - event
+              device_class:
+                - doorbell
+          multiple: false
+          reorder: false
     camera_entity:
       name: Doorbell Camera Entity
       description: The camera entity to stream (e.g. camera.g4_doorbell_pro_high_resolution_channel).
       selector:
         entity:
           filter:
-            - domain: camera
+            - domain:
+                - camera
+          multiple: false
+          reorder: false
     cast_devices:
       name: Nest Hub / Cast Displays
       description: Select one or more Google Nest Hubs or Chromecast displays to stream to.
       selector:
         entity:
           filter:
-            - domain: media_player
+            - domain:
+                - media_player
               integration: cast
           multiple: true
+          reorder: false
     stream_duration:
       name: Stream Duration (seconds)
       description: How long to display the live stream before stopping.
       default: 90
       selector:
         number:
-          min: 15
-          max: 300
-          step: 5
+          min: 15.0
+          max: 300.0
+          step: 5.0
           unit_of_measurement: s
+          mode: slider
     custom_actions:
       name: Additional Actions (Optional)
       description: Extra actions to run when the doorbell rings (e.g., pause media, play a chime, send a notification).
@@ -62,26 +66,17 @@ blueprint:
 mode: restart
 max_exceeded: silent
 
-trigger:
-  - platform: state
-    entity_id: !input doorbell_entity
-    not_to:
-      - unavailable
-      - unknown
+triggers:
+  - trigger: event.received
+    target:
+      entity_id: !input doorbell_entity
+    options:
+      event_type:
+        - ring
 
-condition:
-  # Filter out stale restarts or non-ring state updates:
-  - condition: template
-    value_template: >-
-      {% if trigger.to_state.domain == 'binary_sensor' %}
-        {{ trigger.to_state.state == 'on' }}
-      {% else %}
-        {{ trigger.from_state is not none and
-           trigger.from_state.state not in ['unavailable', 'unknown'] and
-           trigger.to_state.state != trigger.from_state.state }}
-      {% endif %}
+conditions: []
 
-action:
+actions:
   # 1. Execute any extra user actions first (e.g. chime, lights)
   - sequence: !input custom_actions
 

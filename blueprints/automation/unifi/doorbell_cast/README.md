@@ -10,10 +10,10 @@ Automatically streams the live camera feed from your UniFi Doorbell to Google Ne
 ---
 
 ### 🎯 Features
-- **Dual Trigger Support**: Works with either the `Last Doorbell Ring` timestamp sensor or the doorbell `binary_sensor`.
+- **Native Doorbell Event Trigger**: Uses the UniFi Protect doorbell `event` entity (`event.<doorbell>_doorbell`) and Home Assistant's native `event.received` (`event_type: ring`) trigger—replacing the deprecated `binary_sensor` and timestamp sensor entities.
 - **Smart Restart**: If pressed again while streaming, the timer resets so the video feed doesn't cut off prematurely.
 - **Auto-Stop**: Automatically stops the stream after the configured duration (default: 90 seconds).
-- **Nighttime Shield**: Ignores `unavailable` and `unknown` state transitions so Nest Hub screens don't turn on during overnight Home Assistant or network updates.
+- **Nighttime & Reconnect Shield**: Native `event.received` triggering ignores `unavailable` and `unknown` state restoration transitions so Nest Hub screens don't turn on during overnight Home Assistant or network updates.
 - **Multi-Device**: Stream to one or multiple Google Nest Hubs or Chromecast screens simultaneously.
 - **Custom Actions Hook**: Optionally trigger extra actions alongside the stream (e.g., sound an indoor chime, pause media, or turn on porch lights).
 
